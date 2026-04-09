@@ -5,14 +5,15 @@
     align-items: center;
     margin: 0;
     max-width: none;
+    width: 100%;
 
     form {
         text-align: center;
-        width: 100%;
         display: flex;
         justify-content: center;
         flex-direction: column;
         width: max-content;
+        gap: 24px;
 
         span {
             color: #919191;
@@ -30,6 +31,8 @@
 
 .code-v {
     margin-left: auto;
+    padding-bottom: 20px;
+    width: max-content;
 
     a {
         color: #919191;
