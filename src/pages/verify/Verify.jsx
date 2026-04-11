@@ -1,36 +1,84 @@
 import { Link } from "react-router-dom";
 import "./verify.css";
 import InputOtp from "./components/InputOtp";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { cn } from "@/lib/utils";
 import useAutoHeight from "./components/useAutoHeight";
+import gsap from "gsap";
+import { SplitText } from "gsap/SplitText";
 
 export default function Verify() {
   const [otp, setOtp] = useState("");
   const [otpBtn, setOtpBtn] = useState("Confirm my account");
-  const [notSubmitted, setNotSubmitted] = useState(true);
-  const [isOTPvalid, setIsOTPvalid] = useState(false);
+  const [boolState, setBoolState] = useState({
+    isOTPvalid: false,
+    isSubmitting: false,
+    isCreating: false,
+    isCreated: false,
+    isCompleted: false,
+    isSubmitted: true,
+  });
   const { ref, height } = useAutoHeight();
+  const emailSplitRef = useRef(null);
 
   const isComplete = otp.length === 5;
+
+  // gsap plugin registry
+  gsap.registerPlugin(SplitText);
 
   // form submit
   const handleOTP = (e) => {
     e.preventDefault();
 
     if (isComplete && otp === "12345") {
-      console.log("correct");
+      // console.log("correct");
       setOtp("");
       setTimeout(() => {
-        setIsOTPvalid(true);
+        setBoolState((prev) => ({ ...prev, isOTPvalid: true }));
+        setBoolState((prev) => ({ ...prev, isSubmitting: true }));
       }, 1300);
+      setTimeout(() => {
+        setBoolState((prev) => ({ ...prev, isCreating: true }));
+      }, 2500);
+      setTimeout(() => {
+        setBoolState((prev) => ({ ...prev, isCreated: true }));
+      }, 4000);
+      setTimeout(() => {
+        setBoolState((prev) => ({ ...prev, isCompleted: true }));
+      }, 5000);
+
+      // split text instance
+      setTimeout(() => {
+        document.fonts.ready.then(() => {
+          SplitText.create(emailSplitRef.current, {
+            type: "lines, chars",
+            autoSplit: true,
+            charsClass: "char",
+            smartWrap: true,
+            onSplit: (self) => {
+              const specialChar = self.chars.filter(
+                (char) => char.textContent !== "@",
+              );
+
+              console.log(specialChar);
+
+              return gsap.to(specialChar, {
+                opacity: 0,
+                autoAlpha: 0,
+                stagger: {
+                  amount: 0.6,
+                  from: "center",
+                },
+                duration: 0.6,
+                ease: "easeOut",
+              });
+            },
+          });
+        });
+      }, 6000);
     } else {
       setIsOTPvalid(false);
-      console.log("wrong");
-      clearTimeout(() => {
-        setIsOTPvalid(true);
-      }, 1300);
-      setOtp("");
+      // console.log("wrong");
     }
   };
 
@@ -45,7 +93,10 @@ export default function Verify() {
 
     if (otp === "12345") {
       setTimeout(() => {
-        setNotSubmitted(!notSubmitted);
+        setBoolState((prev) => ({
+          ...prev,
+          isSubmitted: false,
+        }));
       }, 1300);
     } else null;
   };
@@ -57,31 +108,45 @@ export default function Verify() {
         style={{
           height: height ?? "auto",
           // overflow: "hidden",
-          transition: "height 1000ms cubic-bezier(0.65, 0, 0.35, 1)",
+          willChange: height,
+          transition: "height 1000ms cubic-bezier(0.65, 0, 0.19, 1.06)",
         }}
       >
-        <div className="inner-verify-form" ref={ref}>
+        <div
+          className={`${boolState.isOTPvalid ? "inner-creating-acc" : "inner-verify-form"}`}
+          ref={ref}
+        >
           <div>
             <span
-              className={`handwritten ${isOTPvalid ? "opacity-0 leading-0" : ""}`}
+              aria-hidden={boolState.isOTPvalid ? true : null}
+              className={`handwritten ${boolState.isOTPvalid ? "opacity-0 leading-0" : ""}`}
             >
               We sent your verification code to
             </span>
 
-            <div className="email-wrapper">joeysuberu@gmail.com</div>
+            <div ref={emailSplitRef} className="email-wrapper">
+              joeysuberu@gmail.com
+            </div>
 
-            {notSubmitted && (
-              <div className="code-v">
+            {boolState.isSubmitted && (
+              <div className="code-v pt-6">
                 <Link to="#" className="handwritten">
                   check yor email inbox here
                 </Link>
               </div>
             )}
 
-            {notSubmitted && <InputOtp otp={otp} setOtp={(value)=> {setOtp(value)}} />}
+            {boolState.isSubmitted && (
+              <InputOtp
+                otp={otp}
+                setOtp={(value) => {
+                  setOtp(value);
+                }}
+              />
+            )}
           </div>
 
-          {notSubmitted && (
+          {boolState.isSubmitted && (
             <div className="w-full">
               <button
                 type="submit"
@@ -96,6 +161,22 @@ export default function Verify() {
                 {otpBtn}
               </button>
             </div>
+          )}
+
+          {/* account creation ui */}
+          {boolState.isSubmitting && (
+            <p
+              aria-hidden={boolState.isCreated ? true : null}
+              className={cn(
+                `handwritten acct-crt-txt transition-all duration-400 ease-in`,
+                `${boolState.isCreating ? "opacity-100" : "opacity-0"}`,
+                `${boolState.isCompleted ? "opacity-0 delay-75" : ""}`,
+              )}
+            >
+              {boolState.isCreated
+                ? "account created"
+                : "creating your account........"}
+            </p>
           )}
         </div>
       </form>
