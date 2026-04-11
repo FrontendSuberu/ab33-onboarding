@@ -81,3 +81,8 @@
 .acct-crt-txt{
     color: #919191;
 }
+
+.char{
+     overflow: visible;
+      padding: 0 .0025px;
+}
