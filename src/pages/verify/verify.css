@@ -28,8 +28,6 @@
         .email-wrapper {
             font-size: 48px;
             font-weight: 500;
-            line-height: 1;
-            padding-bottom: 24px;
         }
     }
 }
@@ -71,4 +69,15 @@
 
 .btn-disabled {
     background-color: #A5A5A5;
+}
+
+.inner-creating-acc{
+    display: flex;
+    flex-direction: column;
+    /* gap: 24px; */
+    gap: 18px;
+}
+
+.acct-crt-txt{
+    color: #919191;
 }
