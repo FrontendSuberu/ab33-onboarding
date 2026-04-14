@@ -1,9 +1,8 @@
-
 import { useState, useLayoutEffect, useCallback, useRef } from "react";
 
 export default function useAutoHeight() {
-  const ref = useRef(null);           // attach to INNER wrapper
-  const containerRef = useRef(null);  // attach to OUTER form
+  const ref = useRef(null); // attach to INNER wrapper
+  const containerRef = useRef(null); // attach to OUTER form
   const [height, setHeight] = useState(null);
   const rafRef = useRef(null);
 
