@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import useAutoHeight from "./components/useAutoHeight";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
+import { CustomEase } from "gsap/CustomEase";
 
 export default function Verify() {
   const [otp, setOtp] = useState("");
@@ -17,6 +18,7 @@ export default function Verify() {
     isCreated: false,
     isCompleted: false,
     isSubmitted: true,
+    isAvatarVisible: false,
   });
   const { ref, height } = useAutoHeight();
   const emailSplitRef = useRef(null);
@@ -25,6 +27,10 @@ export default function Verify() {
 
   // gsap plugin registry
   gsap.registerPlugin(SplitText);
+  gsap.registerPlugin(CustomEase);
+
+  // customEase
+  CustomEase.create("smooth-slide", "0.65, 0, 0.19, 1.06");
 
   // form submit
   const handleOTP = (e) => {
@@ -52,30 +58,49 @@ export default function Verify() {
         document.fonts.ready.then(() => {
           SplitText.create(emailSplitRef.current, {
             type: "lines, chars",
-            autoSplit: true,
+            // autoSplit: true,
             charsClass: "char",
             smartWrap: true,
             onSplit: (self) => {
+              // if (hasAnimated.current) return; // ← bail if already ran
+              // hasAnimated.current = true;
+
               const specialChar = self.chars.filter(
                 (char) => char.textContent !== "@",
               );
 
-              console.log(specialChar);
+              // console.log(atChar);
 
               return gsap.to(specialChar, {
                 opacity: 0,
                 autoAlpha: 0,
+                padding: 0,
+                margin: 0,
                 stagger: {
                   amount: 0.6,
                   from: "center",
                 },
                 duration: 0.6,
-                ease: "easeOut",
+                ease: "smooth-slide",
+                onComplete: () => {
+                  return gsap.to(specialChar, {
+                    width: 0,
+                    duration: 0.2,
+                    onComplete: () => {
+                      specialChar.forEach((char) => char.remove());
+                    },
+                  });
+                },
               });
             },
           });
         });
       }, 6000);
+
+      // display avatar profile
+      setTimeout(() => {
+        setBoolState((prev) => ({ ...prev, isAvatarVisible: true }));
+      }, 7500);
     } else {
       setIsOTPvalid(false);
       // console.log("wrong");
@@ -113,7 +138,9 @@ export default function Verify() {
         }}
       >
         <div
-          className={`${boolState.isOTPvalid ? "inner-creating-acc" : "inner-verify-form"}`}
+          className={cn(
+            `${boolState.isOTPvalid ? "inner-creating-acc" : "inner-verify-form"}`,
+          )}
           ref={ref}
         >
           <div>
@@ -124,12 +151,16 @@ export default function Verify() {
               We sent your verification code to
             </span>
 
-            <div ref={emailSplitRef} className="email-wrapper">
+            <div
+              ref={emailSplitRef}
+              className={`email-wrapper text-center relative flex justify-center items-center 
+               ${boolState.isAvatarVisible ? "blur-md transition-all ease-in" : ""}`}
+            >
               joeysuberu@gmail.com
             </div>
 
             {boolState.isSubmitted && (
-              <div className="code-v pt-6">
+              <div className="code-v">
                 <Link to="#" className="handwritten">
                   check yor email inbox here
                 </Link>
@@ -174,9 +205,20 @@ export default function Verify() {
               )}
             >
               {boolState.isCreated
-                ? "account created"
+                ? "account created :)"
                 : "creating your account........"}
             </p>
+          )}
+
+          {/* avater profile ui */}
+          {boolState.isAvatarVisible && (
+            <div
+              aria-hidden
+              className={cn(
+                `w-30 h-30 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 mx-auto rounded-full avatar-pfp bg-red-500`,
+                `${boolState.isAvatarVisible ? "avatar-pfp-visible" : ""}`,
+              )}
+            />
           )}
         </div>
       </form>
