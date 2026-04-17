@@ -63,7 +63,6 @@
     background-color: #2C2C2C;
     border: none;
     transition: all .6s var(--bouncy-ease);
-    /* border-radius: 30px; */
     color: white;
 }
 
@@ -102,3 +101,6 @@
     scale: 1;
     z-index: 3;
 }
+
+
+/* code udhwu */
