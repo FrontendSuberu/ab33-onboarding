@@ -89,18 +89,16 @@
 .avatar-pfp {
     scale: .5;
     opacity: 0;
-    transition: all .8s var(--bouncy-ease);
+    transition: all 1s var(--bouncy-ease);
 }
 
 .avatar-pfp-visible {
     opacity: 1;
     will-change: scale;
+    /* transition-delay: 1s; */
     -webkit-backdrop-filter: none;
     -moz-backdrop-filter: none;
     backdrop-filter: none;
     scale: 1;
     z-index: 3;
 }
-
-
-/* code udhwu */
